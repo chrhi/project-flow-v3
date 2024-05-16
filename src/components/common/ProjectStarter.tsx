@@ -9,7 +9,7 @@ import toast from 'react-hot-toast';
 import { api } from '~/utils/api';
 import { DateRange } from "react-day-picker"
 import { getUserMetadata } from '~/lib/MetaData';
-import { redis } from '~/lib/upstash';
+
 import { DatePickerWithRange } from "~/components/ui/date-range-picker";
 import { addDays, format } from "date-fns"
 
