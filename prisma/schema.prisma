@@ -1,0 +1,506 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+
+
+enum PHASES {
+  STARTUP
+  PLANNING
+  EXECUTING
+  CONTROLLING
+  CLOSING
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+datasource db {
+  provider = "mysql"
+  url = env("DATABASE_URL")
+  relationMode = "prisma"
+}
+
+model User {
+  id        String    @id @default(uuid())
+  name      String?
+  email     String?   @unique
+  photo     String?   @default("https://cdn.myportfolio.com/17be4dd08c5417027a544816a909fcf8/01b4cc12-6d30-46e1-b8d0-ab3ca15d0fad_rw_1200.png?h=078dbf9c704d63a54cb6942823239e32")
+  password  String?
+  status    String?
+  lastName  String?
+  phone     String?
+  zipCode   String?
+  location  String?
+  type      String?
+  passwordForAdmin String?
+  createdAt DateTime  @default(now())
+  Project   Project[]
+  
+
+  @@index([id])
+}
+
+model MileStones {
+  id           String   @id @default(cuid())
+  projectId String    
+  name      String?     @db.LongText
+  description String?  @db.LongText
+  dueDate     DateTime?
+  project Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  @@index([id])
+  @@index([projectId])
+}
+
+model ProjectObjectives {
+  id           String   @id @default(cuid())
+  projectId String    
+  THE_PROJECTS_OBJECTIVES      String?     @db.LongText
+  SUCCESS_CRITERIA String?  @db.LongText
+  APPROVAL     String?     @db.LongText
+  Type          String?     @db.LongText
+  project Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  @@index([id])
+  @@index([projectId])
+}
+
+model Project {
+  id            String          @id @default(uuid())
+  title         String?
+  startAt       DateTime?
+  endsAt        DateTime?
+  currentPhase  String?  @db.LongText
+  userId        String
+  WorkBreakDownStorage Json?
+  Budget        Float?
+  user          User?            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  StakHolder    StakeHolder[]
+  Risk          Risk[]
+  Resource      Resources[]
+  Comunications Comunications[]
+  MileStones    MileStones[]
+  Startup       Startup[]
+  Planning      Planning[]
+  Executing     Executing[]
+  Controlling   Controlling[]
+  Closing       Closing[]
+  Tasks        Tasks[]
+  ProjectObjectives ProjectObjectives[]
+  Document      Document[]
+  ProjectCloseOut  ProjectCloseOut[]
+  ChangeLog     ChangeLog[]
+
+  @@index([id])
+  @@index([userId])
+}
+
+model Tasks {
+    id        String  @id @default(uuid())
+    projectId String?
+    title     String?
+    description String?
+    Priority    String?
+    Color       String?
+    StartAt    DateTime?
+    EndsAt     DateTime?
+    EndedAt    DateTime?
+    cost       Float?
+    RealCost   Float?
+    imgUrl     String?
+    progress   Int?
+    Shape       String?
+    Status      String?
+    AssignedTo  Json?
+    AlocatedRessources Json?
+    project Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+    @@index([id])
+    @@index([projectId])
+}
+
+
+
+model Document {
+   id        String  @id @default(uuid())
+   name      String? 
+   url       String?
+   path      String?
+   createdAt DateTime  @default(now())
+   status    String?
+   projectId  String?
+   project Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+    @@index([id])
+    @@index([projectId])
+}
+
+model StakeHolder {
+  id        String  @id @default(uuid())
+  projectId String?
+  name      String? 
+  type      String 
+  position  String? 
+  impact    String? 
+  role      String?    @db.LongText
+  Requirements String?  @db.LongText
+  contact     String?  
+  InvestmentAmount String?   
+  Expectations    String?   @db.LongText
+  project Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([id])
+  @@index([projectId])
+}
+
+model Risk {
+  id        String  @id @default(uuid())
+  projectId String?
+  name      String? 
+  cost      String?
+  
+  description String?  @db.LongText
+  levelOfDanger String? 
+  solutions  String?    @db.LongText
+    project Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  @@index([id])
+  @@index([projectId])
+}
+
+model Resources {
+  id        String  @id @default(uuid())
+  projectId String?
+  name      String? 
+  description String?  @db.LongText
+  cost   Float? 
+  quality String?
+  imageUrl String? 
+  project Project?  @relation(fields: [projectId], references: [id])
+
+  @@index([id])
+  @@index([projectId])
+}
+
+model Comunications {
+  id             String  @id @default(uuid())
+  projectId      String?
+  stakeholder    Json?
+  description    String? @db.LongText
+  time           DateTime?
+  method         String?
+  Sender         String?
+
+  project Project?  @relation(fields: [projectId], references: [id])
+
+  @@index([id])
+  @@index([projectId])
+}
+
+model Startup {
+  id        String  @id @default(uuid())
+  projectId String?
+  Title      String? @db.LongText
+  ProjectObjectiveAndOpportunity String? @db.LongText
+  ProjectDescription String? @db.LongText
+  HighLevelRequirements String? @db.LongText
+  HighLevelRisks String? @db.LongText
+  
+  project Project?  @relation(fields: [projectId], references: [id])
+
+  @@index([id])
+  @@index([projectId])
+}
+
+model Planning {
+  id        String  @id @default(uuid())
+  projectId String?
+  project Project?  @relation(fields: [projectId], references: [id])
+  scope Scope[]
+  ManagementPlan ManagementPlan[]
+  scheduelManagementPlan scheduelManagementPlan[]
+  costlManagementPlan costlManagementPlan[]
+  ChangelManagementPlan ChangelManagementPlan[]
+  RisklManagementPlan RisklManagementPlan[]
+  ProjectLifeCycle    ProjectLifeCycle[]
+  @@index([id])
+  @@index([projectId])
+}
+
+model Executing  {
+  id        String  @id @default(uuid())
+  projectId String?
+  project Project?  @relation(fields: [projectId], references: [id])
+  
+  @@index([id])
+  @@index([projectId])
+}
+
+model Controlling  {
+  id        String  @id @default(uuid())
+  projectId String?
+  project Project?  @relation(fields: [projectId], references: [id])
+  ContractorStatusReport ContractorStatusReport[]
+  IssueLog  IssueLog[]
+  ProjectPeformaceReport ProjectPeformaceReport[]
+
+  @@index([id])
+  @@index([projectId])
+}
+
+model Closing  {
+  id        String  @id @default(uuid())
+  projectId String?
+  project Project?  @relation(fields: [projectId], references: [id])
+  
+  formalAcceptance formalAcceptance[]
+
+
+  @@index([id])
+  @@index([projectId])
+}
+
+model scheduelManagementPlan {
+  id        String  @id @default(uuid())
+  PlanningId String?
+  ScheduleMethodology      String? @db.LongText
+  ScheduleTools String? @db.LongText
+  LevelOfAccuracy String? @db.LongText
+  UnitsOfMeasure String? @db.LongText
+  VarianceThresholds String? @db.LongText
+ ScheduleReportingAndFormat String? @db.LongText
+ ProcessManagementActivitySequencing String? @db.LongText
+  ProcessManagementEstimatingResources String? @db.LongText
+  ProcessManagementEstimatingEffortAndDuration String? @db.LongText
+  ProcessManagementUpdatingMonitoringAndControlling String? @db.LongText
+ ProcessManagementActivityidentification String? @db.LongText
+  planning Planning?  @relation(fields: [PlanningId], references: [id])
+
+  @@index([id])
+  @@index([PlanningId])
+}
+model costlManagementPlan {
+  id        String  @id @default(uuid())
+  PlanningId String?
+  LevelOfAccuracy      String? @db.LongText
+  UnitsOfMeasure String? @db.LongText
+  ControlThresholds String? @db.LongText
+  RulesForPerformanceMeasurement String? @db.LongText
+  CostReportingAndFormat String? @db.LongText
+ EstimatingCosts String? @db.LongText
+ DevelopingTheBudget String? @db.LongText
+  UpdatingMonitoringAndControlling String? @db.LongText
+ 
+  planning Planning?  @relation(fields: [PlanningId], references: [id])
+
+  @@index([id])
+  @@index([PlanningId])
+}
+model ChangelManagementPlan {
+  id        String  @id @default(uuid())
+  PlanningId String?
+  ChangeManagementApproach      String? @db.LongText
+  ScheduleChange String? @db.LongText
+  BudgetChange String? @db.LongText
+  ScopeChange String? @db.LongText
+  ProjectDocumentChanges String? @db.LongText
+ ChangeRequestSubmittal String? @db.LongText
+ ChangeRequestTracking String? @db.LongText
+  ChangeRequestReview String? @db.LongText
+   ChangeRequestDisposition String? @db.LongText
+  planning Planning? @relation(fields: [PlanningId], references: [id])
+
+  @@index([id])
+  @@index([PlanningId])
+}
+model RisklManagementPlan {
+  id        String  @id @default(uuid())
+  PlanningId String?
+  Methodology      String? @db.LongText
+  RolesAndResponsibilities String? @db.LongText
+  RiskCategories String? @db.LongText
+  RiskManagementFunding String? @db.LongText
+  ContingencyProtocols String? @db.LongText
+ FrequencyAndTiming String? @db.LongText
+ StakeholderRiskTolerances String? @db.LongText
+  TrackingAndAudit String? @db.LongText
+  planning Planning?  @relation(fields: [PlanningId], references: [id])
+
+  @@index([id])
+  @@index([PlanningId])
+}
+
+model Scope {
+  id        String  @id @default(uuid())
+  PlanningId String?
+  ScopeStatementDevelopment      String? @db.LongText
+  WBSStructure String? @db.LongText
+  WBSDictionary String? @db.LongText
+  ScopeBaselineMaintenance String? @db.LongText
+  ScopeChange String? @db.LongText
+ DeliverableAcceptance String? @db.LongText
+ ScopeandRequirementsIntegration String? @db.LongText
+  planning Planning?  @relation(fields: [PlanningId], references: [id])
+
+  @@index([id])
+  @@index([PlanningId])
+}
+
+model ManagementPlan {
+  id        String  @id @default(uuid())
+  PlanningId String?
+  IntegrationProcesses      String? @db.LongText
+  IntegrationTailoringDecisions String? @db.LongText
+  ScopeProcesses String? @db.LongText
+  ScopeTailoringDecisions String? @db.LongText
+  TimeProcesses String? @db.LongText
+ TimeTailoringDecisions String? @db.LongText
+ CostProcesses String? @db.LongText
+ CostTailoringDecisions String? @db.LongText
+  QualityProcesses      String? @db.LongText
+  QualityTailoringDecisions String? @db.LongText
+  HumanResourcesProcesses String? @db.LongText
+  HumanResourcesTailoringDecisions String? @db.LongText
+  CommunicationProcesses String? @db.LongText
+ CommunicationTailoringDecisions String? @db.LongText
+ RiskProcesses String? @db.LongText
+ RiskTailoringDecisions String? @db.LongText
+   ProcurementProcesses String? @db.LongText
+  ProcurementTailoringDecisions String? @db.LongText
+ StakeholdersProcesses String? @db.LongText
+ StakeholdersTailoringDecisions String? @db.LongText
+ IntegrationToolsandTechniques String? @db.LongText
+    ScopeToolsAndTechniques String? @db.LongText
+  TimeToolsAndTechniques String? @db.LongText
+ CostToolsandTechniques String? @db.LongText
+ QualityToolsAndTechniques String? @db.LongText
+ HumanResourcesToolsAndTechniques String? @db.LongText
+    CommunicationToolsAndTechniques String? @db.LongText
+  RiskToolsAndTechniques String? @db.LongText
+ ProcurementToolsAndTechniques String? @db.LongText
+ StakeholdersToolsAndTechniques String? @db.LongText
+ ProjectReviews String? @db.LongText
+
+  planning Planning? @relation(fields: [PlanningId], references: [id])
+
+  @@index([id])
+  @@index([PlanningId])
+}
+
+model ProjectCloseOut {
+  id        String  @id @default(uuid())
+  ObjectDuProjet      String? @db.LongText
+  CritereDeRealisationDeLaPorteeDuProjet String? @db.LongText
+  ObjectifsDeLaPorteeOntEteAttents String? @db.LongText
+  ObjectifsDeQualiteDuProjet String? @db.LongText
+  CriteresDeRealisationDeLaQualite String? @db.LongText
+  CommentLaQualiteAEteAtteinte String? @db.LongText
+  ObjectifsDeTempsDuProjet String? @db.LongText
+  CriteresDeRealisationDesDelais String? @db.LongText
+  CommentLesObjectifsDeDelaisOntEteAtteints      String? @db.LongText
+  ObjectifsDeCoutDuProjet String? @db.LongText
+  CriteresDeRealisationDesCouts String? @db.LongText
+  CommentLesObjectifsDeCoutsOntEteAtteints String? @db.LongText
+  projectId String?
+  project Project?  @relation(fields: [projectId], references: [id])
+  @@index([id])
+  @@index([projectId])
+}
+
+model ChangeLog {
+  id        String  @id @default(uuid())
+  ActivitesPrevuesPourCettePeriodeDeRapport      String? @db.LongText
+  ActivitesRealiseesAuCoursDeCettePeriodeDeRapport String? @db.LongText
+  ActivitesPrevuesMaisNonRealiseesAuCoursDeCettePeriodeDeRapport String? @db.LongText
+  LaCauseProfondeDesEcarts String? @db.LongText
+  FondsDepensesAuCoursDeCettePeriodeDeRapport String? @db.LongText
+  FondsPrevusADepenserAuCoursDeCettePeriodeDeRapport String? @db.LongText
+  CauseFondamentaleDesEcarts String? @db.LongText
+  EcartsDeQualiteIdentifiesPendantCettePeriode String? @db.LongText
+  ActionCorrectiveOuPreventivePlanifiee      String? @db.LongText
+  ActivitesPrevuesPourLaProchainePeriodeDeRapport String? @db.LongText
+  CoutsPrevusPourLaProchainePeriodeDeRapport String? @db.LongText
+  RisquesNouvellementIdentifies String? @db.LongText
+  ProblrmesIdentifies String? @db.LongText
+  Commentaires String? @db.LongText
+  projectId String?
+  project Project?  @relation(fields: [projectId], references: [id])
+  @@index([id])
+  @@index([projectId])
+}
+
+  
+
+model  formalAcceptance {
+    id        String  @id @default(uuid())
+    ClosingId String? 
+    REQUIREMENT String?
+    ACCEPTANCE_CRITERIA  String?
+    VALIDATION_METHOD   String?
+    STATUS         String?
+    COMMENTS       String?
+    SIGNOFF        String?
+    closing Closing?  @relation(fields: [ClosingId], references: [id])
+    @@index([id])
+    @@index([ClosingId])
+}
+
+model ProjectLifeCycle {
+  id        String  @id @default(uuid())
+  PlanningId String?
+  Phase      String? @db.LongText
+  KeyDeliverables String? @db.LongText
+  
+  planning Planning?  @relation(fields: [PlanningId], references: [id])
+
+  @@index([id])
+  @@index([PlanningId])
+}
+
+model ContractorStatusReport {
+    id        String  @id @default(uuid())
+    ControllingId String?
+    controlling Controlling?  @relation(fields: [ControllingId], references: [id])
+    ScopePerformanceThisReportingPeriod String? @db.LongText
+    QualityPerformanceThisReportingPeriod  String? @db.LongText
+    SchedulePerformanceThisReportingPeriod String? @db.LongText
+    PlannedCorrectiveOrPreventiveAction  String? @db.LongText
+    CostPerformanceThisReportingPeriod String? @db.LongText
+    ForecastPerformanceForFutureReportingPeriods String? @db.LongText
+    ClaimsOrDisputes String? @db.LongText
+    Risks String? @db.LongText
+    Issues String? @db.LongText
+    Comments String? @db.LongText
+    @@index([id])
+    @@index([ControllingId])
+}
+
+model IssueLog {
+   id            String  @id @default(uuid())
+   ControllingId String?
+   controlling Controlling?  @relation(fields: [ControllingId], references: [id])
+
+   FirstTable  Json?
+   SecondTable  Json?
+
+   @@index([id])
+   @@index([ControllingId])
+}
+
+model ProjectPeformaceReport {
+   id            String  @id @default(uuid())
+   ControllingId String?
+   controlling Controlling?  @relation(fields: [ControllingId], references: [id])
+
+   AccomplishmentsForThisReportingPeriod String? @db.LongText 
+   AccomplishmentsPlannedButNotCompletedThisReportingPeriod String? @db.LongText 
+   RootCauseOfVariances String? @db.LongText 
+   ImpactToUpcomingMilestonesOrProjectDueDate String? @db.LongText 
+   PlannedCorrectiveOrPreventiveAction String? @db.LongText 
+   FundsSpentThisReportingPeriod String? @db.LongText 
+   AccomplishmentsPlannedForNextReportingPeriod String? @db.LongText 
+   ImpactToOverallBudgetOrContingencyFunds String? @db.LongText 
+   CostsPlannedForNextReportingPeriod String? @db.LongText 
+   Risk String? @db.LongText 
+   Issues String? @db.LongText 
+   Comments String? @db.LongText 
+
+   @@index([id])
+   @@index([ControllingId])
+}
